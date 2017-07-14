@@ -262,7 +262,7 @@ var a = 30;
 ex15a();
 ex15b();
 */
-
+/*
 // ----------------------
 //example 16: never do this. Note "with" isnt even allowed in strict mode any longer
 function ex16(obj) {
@@ -275,3 +275,197 @@ function ex16(obj) {
 ex16({a:42});
 ex16({a:26});
 ex16({});
+*/
+/*
+// ----------------------
+//example 17: higher order function (defined as fn that takes in fns)
+function ex17(callback) {
+    callback(1);
+    callback(2);
+    callback(3);
+}
+ex17(function (arg) {
+    console.log(arg);
+});
+*/
+/*
+// ----------------------
+//example 18: example higher order function & closure intro
+function filterArray(array, predicate) {
+    var result = [];
+    for(var i=0; i<array.length;i++) {
+        var item = array[i];
+        if(!predicate(item))
+            continue;
+        result.push(item);
+    }
+    return result;
+}
+var array = [1,2,3,4,5,6,7];
+var result = filterArray(array, function (item) {
+    return item < 4;
+});
+console.log(result);
+
+function lessThanFilter(lessThan) { // less than is bound to lessThanFilter param
+    return function (item) {        // item is bound to the param of the closure (this is a closure)
+        return item < lessThan;     // when we call it more than once, you're getting instances of the closure
+    };
+}
+var lessThan5 = lessThanFilter(5);
+console.log(lessThan5(3), lessThan5(10));
+console.log(filterArray(array,lessThanFilter(2)));
+*/
+/*
+// ----------------------
+//example 19:
+function validatePassword(password) {
+    var calledCount = 0;
+    return function (attempt) {
+        calledCount++;
+        console.log(`validator of ${password} called ${calledCount} times.`);
+        return attempt === password;
+    };
+}
+
+var validateA = validatePassword("passworda");
+var validateB = validatePassword("passwordb");
+//invoke from console 3x: validate("invalid")
+//invoke proper pw in valb
+//invoke proper pw on vala
+//the instance of the validatePassword closure is carried with the vars
+//closures are common sources of memory leaks - validateA would need set to null to GC the closure.
+*/
+/*
+// ----------------------
+//example 20:
+function ex20() {
+    var a = 20;
+    return inner1();
+    function inner1() {
+        var b = 30;
+        return inner2();
+
+        function inner2() {
+            var c = 40;
+            return function () {
+                console.log(a,b,c);
+            };
+        }
+    }
+}
+var closure = ex20();
+closure();  // this has object access to all 3 closures
+*/
+//solutions for example 1
+var people = ["nelson","foo","bar","baz"];
+var ul = document.getElementById("people-list");
+/*
+// ----------------------
+//example 21: solution 1
+for(var i = 0; i<people.length;i++) {
+    var person = people[i];
+    var element = document.createElement("li");
+    prepareElementForPerson(person, element);   // the function locally scopes person and elm
+    ul.appendChild(element);
+}
+function prepareElementForPerson(person,elm) {  // these are passed by value, not reference
+    elm.innerText = person;
+    elm.addEventListener("click", function () {
+        alert("you clicked on " +person);
+    });
+}
+*/
+/*
+// ----------------------
+//example 21: solution 2 =, IFFE
+for(var i = 0; i<people.length;i++) {
+    var person = people[i];
+    var element = document.createElement("li");
+    (function () {
+        var person2 = person;
+        element.innerText = person2;
+        element.addEventListener("click", function () {
+            alert("you clicked on "+person2);
+        });
+    })();
+    ul.appendChild(element);
+}
+*/
+/*
+// ----------------------
+//example 21: solution 3
+function forEach(array, callback) {
+    for(var i =0; i<array.length; i++ ) {
+        callback(array[i]);
+    }
+}
+forEach(people, function (person) {
+    var elm = document.createElement("li");
+    elm.innerText = person;
+    elm.addEventListener("click", function () { // this closure is "closing over the person variable"
+        alert("you clicked on "+person);
+    });
+    ul.appendChild(elm);
+});
+// Sol#3 is best, Sol #1 is 2nd best, Sol#2 is least preferred, harder to read
+//note: there is a built in function of people.forEach(fn)
+*/
+/*
+// ----------------------
+// example 22: ES6 solution
+function ex22a() {
+    if(true) {
+        var test = "whoa - var";
+    }
+    console.log(test);
+}
+ex22a();
+function ex22b() {
+    if(true) {
+        let test = "whoa - let";  //"let" is a block-scoped variable
+        console.log(test);
+    }
+    console.log(test);
+}
+ex22b();
+*/
+/*
+// ----------------------
+//example 23 - solution 4
+for(let i=0; i<people.length; i++) {
+    let person = people[i];
+    let element = document.createElement("li");
+    element.innerText = person;
+    element.addEventListener("click", function () {
+        alert("you clicked on " + person);
+    });
+    ul.appendChild(element);
+}
+// can compare what JS is doing by going to babeljs.io and pasting in ES6 code, it will show ES5 on RH side
+*/
+/*
+// ----------------------
+//example 24
+const b = 20;
+b = 10; // this throws a typeError, cant re-assign it.
+const person = {name: "nelson"};
+person.name = "foo";    //this is OK/permitted
+console.log(person);
+
+person = {}; // this will throw
+//performance benefits for JS engine optimization of the code
+*/
+/*
+// ----------------------
+//example 23 - Using COnst
+for(let i=0; i<people.length; i++) {
+    const person = people[i];                     // can use here
+    const element = document.createElement("li"); // can use here
+    element.innerText = person;
+    element.addEventListener("click", function () {
+        alert("you clicked on " + person);
+    });
+    ul.appendChild(element);
+}
+*/
